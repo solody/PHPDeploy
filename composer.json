@@ -1,0 +1,15 @@
+{
+  "name": "solody/PHPDeploy",
+  "description": "Auto deploy the Github Gitlab or Bitbucket project, by using git webhook.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "kent",
+      "email": "kent@solody.com"
+    }
+  ],
+  "require": {
+    "zendframework/zend-config": "^2.6"
+  }
+}
