@@ -21,71 +21,77 @@ if ($_SERVER['REQUEST_METHOD']=='POST') {
 
     $input_json = json_decode($input_content);
 
+    if ($_GET['secret'] != $config->secret) $txt .= 'Secret Verify Fails.'.PHP_EOL;
+    else {
 
+        $txt .= 'Secret Verify Success.'.PHP_EOL;
 
-    foreach ($config as $site_name=>$site_values) {
+        foreach ($config->sites as $site_name=>$site_values) {
 
-        if ($site_values->repository->home == $input_json->repository->links->html->href) {
+            if ($site_values->repository->home == $input_json->repository->links->html->href) {
 
-            $txt .= 'Site ['.$site_name.'] Match'.PHP_EOL;
+                $txt .= 'Site ['.$site_name.'] Match'.PHP_EOL;
 
-            $change_count = count($input_json->push->changes);
+                $change_count = count($input_json->push->changes);
 
-            if ($change_count > 0) {
+                if ($change_count > 0) {
 
-                $txt .= 'Get ['.$change_count.'] Changes'.PHP_EOL;
+                    $txt .= 'Get ['.$change_count.'] Changes'.PHP_EOL;
 
-                foreach ($input_json->push->changes as $index=>$change) {
+                    foreach ($input_json->push->changes as $index=>$change) {
 
-                    $txt .= 'Processing Change '.($index+1).', changeType='.$change->new->type.PHP_EOL;
+                        $txt .= 'Processing Change '.($index+1).', changeType='.$change->new->type.PHP_EOL;
 
-                    if ($change->new->type == 'tag' && !file_exists('./package/'.$site_name.'/'.$change->new->name.'.tar.gz')) {
+                        if ($change->new->type == 'tag' && !file_exists('./package/'.$site_name.'/'.$change->new->name.'.tar.gz')) {
 
-                        $cmd = './download.sh '.$site_name.' '.$site_values->repository->download_url.' '.$change->new->name.' '.
-                                                $site_values->repository->auth->username.' '.$site_values->repository->auth->password;
-                        $txt .= 'Running Download Shell Script: '.$cmd.PHP_EOL;
-                        $txt .= shell_exec($cmd).PHP_EOL;
-                        $txt .= 'Download Shell Complete.'.PHP_EOL;
-
-                        if ($site_values->runComposerInstall) {
-                            $cmd = './composer_install.sh '.$site_name;
-                            $txt .= 'Running Composer Install: '.$cmd.PHP_EOL;
+                            $cmd = './download.sh '.$site_name.' '.$site_values->repository->download_url.' '.$change->new->name.' '.
+                                $site_values->repository->auth->username.' '.$site_values->repository->auth->password;
+                            $txt .= 'Running Download Shell Script: '.$cmd.PHP_EOL;
                             $txt .= shell_exec($cmd).PHP_EOL;
-                            $txt .= 'Composer Install Complete.'.PHP_EOL;
-                        }
+                            $txt .= 'Download Shell Complete.'.PHP_EOL;
 
-                        if (!empty($site_values->siteData)) {
-                            foreach ($site_values->siteData as $link=>$path) {
-                                $cmd = './link_data.sh '.$site_name.' '.$link.' '.$path;
-                                $txt .= 'Running Link Data : '.$cmd.PHP_EOL;
+                            if ($site_values->runComposerInstall) {
+                                $cmd = './composer_install.sh '.$site_name;
+                                $txt .= 'Running Composer Install: '.$cmd.PHP_EOL;
                                 $txt .= shell_exec($cmd).PHP_EOL;
-                                $txt .= 'Link Data Complete.'.PHP_EOL;
+                                $txt .= 'Composer Install Complete.'.PHP_EOL;
                             }
+
+                            if (!empty($site_values->siteData)) {
+                                foreach ($site_values->siteData as $link=>$path) {
+                                    $cmd = './link_data.sh '.$site_name.' '.$link.' '.$path;
+                                    $txt .= 'Running Link Data : '.$cmd.PHP_EOL;
+                                    $txt .= shell_exec($cmd).PHP_EOL;
+                                    $txt .= 'Link Data Complete.'.PHP_EOL;
+                                }
+                            }
+
+                            $cmd = './link_site.sh '.$site_name.' '.$site_values->siteRoot;
+                            $txt .= 'Running Link Site : '.$cmd.PHP_EOL;
+                            $txt .= shell_exec($cmd).PHP_EOL;
+                            $txt .= 'Link Site Complete.'.PHP_EOL;
+
+                        } elseif ($change->new->type != 'tag') {
+
+                            $txt .= 'changeType ignored.'.PHP_EOL;
+
+                        } elseif (file_exists('./package/'.$site_name.'/'.$change->new->name.'.tar.gz')) {
+
+                            $txt .= 'This tag ['.$change->new->name.'] had deployed in ['.$site_name.'] before, ignored.'.PHP_EOL;
+
                         }
-
-                        $cmd = './link_site.sh '.$site_name.' '.$site_values->siteRoot;
-                        $txt .= 'Running Link Site : '.$cmd.PHP_EOL;
-                        $txt .= shell_exec($cmd).PHP_EOL;
-                        $txt .= 'Link Site Complete.'.PHP_EOL;
-
-                    } elseif ($change->new->type != 'tag') {
-
-                        $txt .= 'changeType ignored.'.PHP_EOL;
-
-                    } elseif (file_exists('./package/'.$site_name.'/'.$change->new->name.'.tar.gz')) {
-
-                        $txt .= 'This tag ['.$change->new->name.'] had deployed in ['.$site_name.'] before, ignored.'.PHP_EOL;
 
                     }
 
+                } else {
+                    $txt .= 'Get none Changes'.PHP_EOL;
                 }
 
-            } else {
-                $txt .= 'Get none Changes'.PHP_EOL;
             }
-
         }
+
     }
+
 
     if (!file_exists('./log')) mkdir('./log');
     $my_file = fopen("./log/".date('Y-m-d-H-i-s',time()).".txt", "w");
