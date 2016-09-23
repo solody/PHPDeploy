@@ -9,6 +9,7 @@ When commits are pushed to your Git repository, the Git server will notify Git-A
 PHPDeploy parses and validates the request, and if all goes well and it is a new tag push, PHPDeploy will check the sites configured in config.php, if match, download tag package into the ./package/ dir, then unzip into the ./deploy/ dir, last generate soft links that you had configured in config.php. if necessarily you also can configure a composer install action for the site.
 
 ### How to use
+```bash
 git clone https://github.com/solody/phpdeploy.git
 cd phpdeploy
 composer.phar install
@@ -17,3 +18,4 @@ chmod 777 ./*.sh
 chmod 777 .
 
 cp config-sample.php config.php
+```
