@@ -9,18 +9,18 @@ When commits are pushed to your Git repository, the Git server will notify PHPDe
 PHPDeploy parses and validates the request, and if all goes well and it is a new tag push, PHPDeploy will check the sites configured in config.php, if match, download tag package into the ./package/ dir, then unzip into the ./deploy/ dir, last generate soft links that you had configured in config.php. if necessarily you also can configure a composer install action for the site.
 
 ## How to use
-### Download and install
+### Step1. Download and install
 ```bash
 git clone https://github.com/solody/phpdeploy.git
 cd phpdeploy
 php composer.phar install
 ```
-### Set Permissions
+### Step2. Set Permissions
 ```bash
 chmod 777 ./*.sh
 chmod 777 .
 ```
-### Config your site info
+### Step3. Config your site info
 ```bash
 cp config-sample.php config.php
 vi config.php
@@ -48,6 +48,10 @@ return [
     ]
 ];
 ```
-### Set Webhook for your git project.
+### Step6. Config phpdeploy as a apache website
+Set phpdeploy/public as site root.
+
+
+### Step5. Set Webhook for your git project.
 Since you setup the phpdeploy on you httpd server, then go to your git webhook setting page, fill your phpdeploy's url, the url similar 
-http://you-domain-name/?secret=sdfsdgfgjgukyuyukrrwwt45efgdgfdgf
+http://you-domain-name/index.php?secret=sdfsdgfgjgukyuyukrrwwt45efgdgfdgf
