@@ -10,6 +10,7 @@ $config = new \Zend\Config\Config(include '../config.php');
 
 chdir(dirname(__DIR__));
 
+putenv("HOME=".getcwd());
 
 if ($_SERVER['REQUEST_METHOD']=='POST') {
 
